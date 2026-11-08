@@ -4062,7 +4062,7 @@
         visa: "Non-Immigrant ED Plus",
         stayStart: "2025-12-03",
         expiry: "2026-12-02",
-        report90: "2026-11-16",
+        report90: "2026-11-28", // = วันเข้าไทย 3 ธ.ค. 2568 + 90 วัน × 4 รอบ (คำนวณอัตโนมัติในขั้นตั้งค่าบัญชี)
         group: "นักศึกษาปริญญาโท (เต็มเวลา)",
         uni: "มหาวิทยาลัยสยามเดโม",
         faculty: "คณะบริหารธุรกิจ",
@@ -4175,24 +4175,25 @@
         empty: "ยังไม่มีใบรับแจ้งที่พัก (ตม.30) ในระบบ",
         edit: "tm30",
       });
-      /** ตม.30: ตรวจหมายเลขหนังสือเดินทางกับข้อมูลส่วนตัว แล้วแสดงข้อมูลที่พักที่ดึงมาอัตโนมัติ */
-      const normPass = (x) => String(x || "").replace(/\s/g, "").toUpperCase();
-      const tm30Match = (p) => !!S.form.passNo && normPass(S.form.passNo) === normPass(p.passport);
-      function tm30Pulled(p) {
-        const v = normPass(S.form.passNo);
-        if (!v) return "";
-        if (!tm30Match(p))
-          return v.length >= 6
-            ? `<div class="hint" style="color:var(--amber)">${ic("alert", 13)} ยังไม่ตรงกับหมายเลขหนังสือเดินทางในข้อมูลส่วนตัว</div>`
-            : "";
+      /** ตม.30: หน้าตรวจสอบข้อมูลการแจ้งที่พัก (ดูอย่างเดียว) — ดึงจากข้อมูลส่วนตัวตามที่รับแจ้งจากเจ้าของที่พัก */
+      function tm30View(p) {
         const row = (a, b) => `<div class="kv"><span>${a}</span><b>${b ? esc(b) : '<span class="muted">-</span>'}</b></div>`;
-        return `<div class="pulled"><div class="pulled-h"><span class="autotag" style="margin:0">${ic("check", 12)} ดึงอัตโนมัติจากข้อมูลส่วนตัว</span></div>
+        const info = p.address
+          ? `${row("หมายเลขหนังสือเดินทาง", p.passport)}${row("ที่อยู่ที่พัก", p.address)}${row("วันที่ย้ายเข้า", p.moveIn ? fd(p.moveIn) : "")}${row("ชื่อเจ้าของที่พัก", p.ownerName)}${row("เบอร์โทรเจ้าของที่พัก", p.ownerPhone)}
   ${
-    p.address
-      ? `${row("ที่อยู่ที่พัก", p.address)}${row("วันที่ย้ายเข้า", p.moveIn ? fd(p.moveIn) : "")}${row("ชื่อเจ้าของที่พัก", p.ownerName)}${row("เบอร์โทรเจ้าของที่พัก", p.ownerPhone)}`
-      : `<div class="alert amber mt8"><div class="ai">${ic("alert")}</div><div><b>ยังไม่มีข้อมูลการแจ้งที่พักในระบบ</b><p>เจ้าของที่พักต้องแจ้ง ตม.30 ก่อน เมื่อแจ้งแล้วที่อยู่จะขึ้นที่นี่อัตโนมัติ</p></div></div><button class="demo-fill mt8" onclick="demoStay()">${ic("spark", 16)} จำลองว่าเจ้าของที่พักแจ้งแล้ว (สำหรับเดโม)</button>`
+    p.stayOK
+      ? `<div class="stay-ok">${ic("check", 16)} ยืนยันแล้วว่าข้อมูลถูกต้อง</div>`
+      : `<button class="btn btn-primary mt12" style="height:48px" onclick="S.p.stayOK=true;toast('ยืนยันข้อมูลที่พักแล้ว');render()">${ic("check", 18)} ยืนยันข้อมูลถูกต้อง</button>`
   }
-  <div class="ro-note">ข้อมูลทั้งหมดดึงมาจากข้อมูลส่วนตัว (รับแจ้งจากเจ้าของที่พัก)</div></div>`;
+  <div class="ro-note" style="text-align:center">ข้อมูลไม่ถูกต้อง? ให้ติดต่อเจ้าของที่พักเพื่อแจ้งแก้ไข</div>`
+          : `${row("หมายเลขหนังสือเดินทาง", p.passport)}<div class="alert amber mt8"><div class="ai">${ic("alert")}</div><div><b>ยังไม่มีข้อมูลการแจ้งที่พักในระบบ</b><p>เจ้าของที่พักต้องแจ้ง ตม.30 ก่อน เมื่อแจ้งแล้วข้อมูลจะขึ้นที่นี่อัตโนมัติ</p></div></div><button class="demo-fill mt8" onclick="demoStay()">${ic("spark", 16)} จำลองว่าเจ้าของที่พักแจ้งแล้ว (สำหรับเดโม)</button>`;
+        return `<div class="card float"><div class="stay-src">${ic("house", 16)}<span><b>ดึงมาจากข้อมูลส่วนตัว</b>ตามที่รับแจ้งจากเจ้าของที่พัก (ตม.30) ผู้ใช้แก้ไขเองไม่ได้</span></div>
+  ${info}</div>
+  <div class="sec-title">คำแนะนำสำหรับการย้ายที่พัก</div><div class="card tips"><ol>
+  <li><b>แจ้งเจ้าของที่พักเก่า</b>ว่าจะย้ายออกวันไหน เพื่อให้รับทราบและจัดการเรื่องสัญญาเช่า เงินประกัน และค่าใช้จ่ายต่าง ๆ</li>
+  <li><b>แจ้งวันย้ายออกให้ชัดเจน</b>เพื่อให้เจ้าของที่พักเก่าจัดการข้อมูลผู้เข้าพักตามระบบของตน</li>
+  <li><b>แจ้งเจ้าของที่พักใหม่</b>ให้ดำเนินการ TM.30 ภายใน 24 ชั่วโมงหลังเข้าพัก</li></ol>
+  <div class="tips-note">${ic("doc", 16)}<span>เก็บหลักฐาน TM.30 ของที่พักใหม่ไว้ใช้เมื่อติดต่อสำนักงานตรวจคนเข้าเมือง</span></div></div>`;
       }
       const SV = {
         ext: {
@@ -4263,7 +4264,7 @@
               hint: "หากย้ายที่พัก ต้องแจ้ง ตม.30 ก่อน",
               after:
                 S.form.stay === "ย้ายที่พักแล้ว"
-                  ? `<div class="alert amber mt8"><div class="ai">${ic("alert")}</div><div><b>ต้องแจ้งที่พักใหม่ (ตม.30) ก่อน</b><p>เมื่อเจ้าของที่พักแจ้งแล้ว ระบบจะดึงที่อยู่ใหม่มาใช้รายงานตัวให้อัตโนมัติ</p><button class="btn btn-primary btn-sm mt8" onclick="openSvc('tm30')">${ic("house", 16)} ไปแจ้งที่พัก ตม.30</button></div></div>`
+                  ? `<div class="alert amber mt8"><div class="ai">${ic("alert")}</div><div><b>เจ้าของที่พักใหม่ต้องแจ้ง ตม.30 ก่อน</b><p>เมื่อเจ้าของที่พักแจ้งแล้ว ระบบจะดึงที่อยู่ใหม่มาใช้รายงานตัวให้อัตโนมัติ</p><button class="btn btn-primary btn-sm mt8" onclick="openSvc('tm30')">${ic("house", 16)} ตรวจสอบข้อมูลแจ้งที่พัก</button></div></div>`
                   : "",
             },
             ...(S.form.stay === "ย้ายที่พักแล้ว"
@@ -4286,7 +4287,7 @@
         tm30: {
           name: "แจ้งที่พัก (ตม.30)",
           short: "แจ้งที่พัก ตม.30",
-          sub: "ดึงข้อมูลที่พักจากข้อมูลส่วนตัว",
+          sub: "ตรวจสอบข้อมูลที่เจ้าของที่พักแจ้ง",
           ic: "house",
           c: "c-blue",
           fee: "ไม่มีค่าธรรมเนียม",
@@ -4303,18 +4304,7 @@
             "ตม. ตรวจสอบข้อมูลที่พัก",
             "ได้รับใบรับแจ้งที่พัก (ตม.30)",
           ],
-          fields: (p) => [
-            {
-              id: "passNo",
-              l: "หมายเลขหนังสือเดินทาง",
-              type: "text",
-              req: 1,
-              v: "",
-              ph: "เช่น EJ4829175",
-              hint: "กรอกให้ตรงกับหนังสือเดินทาง ระบบจะดึงข้อมูลที่พักจากข้อมูลส่วนตัวให้อัตโนมัติ",
-              after: tm30Pulled(p),
-            },
-          ],
+          fields: () => [], // หน้าตรวจสอบข้อมูลอย่างเดียว ไม่มีการยื่นคำขอ
         },
         reentry: {
           name: "ขออนุญาตกลับเข้าประเทศ (Re-entry)",
@@ -5012,7 +5002,7 @@
       const OB_STEP_KEYS = [
         ["name", "passport", "nat", "gender", "dob", "country", "city", "occupation", "visaNo", "passExp"],
         ["arrivalDate", "purpose"],
-        ["visa", "visaNo", "report90"],
+        ["visa", "visaNo"],
         ["schoolType", "uni", "group", "expiry", "phone"],
       ];
       const OB_GOV_DOCS = ["passport", "visa_page", "photo"]; // เอกสารที่ต้องใช้ (จำเป็นทั้งหมด)
@@ -5044,7 +5034,7 @@
       /** ผลการสแกน (จำลอง): passport = หน้าข้อมูลหนังสือเดินทาง (MRZ), visa = หน้าวีซ่า/ตราประทับ */
       const SCAN_KEYS = {
         passport: ["name", "passport", "nat", "gender", "dob", "passExp"],
-        visa: ["visa", "visaNo", "report90"],
+        visa: ["visa", "visaNo"],
       };
       function obSet(k, v) {
         S.p[k] = v;
@@ -5091,16 +5081,19 @@
         }, 1600);
       }
       /** คำนวณวันครบรายงานตัว 90 วันจากวันเริ่มอนุญาต (รอบถัดไปที่ยังไม่เลยกำหนดเกิน 7 วัน) */
-      function obCalc90() {
-        if (!S.p.arrivalDate) {
-          S.ob.err.report90 = "กรุณากรอกวันที่เดินทางเข้าประเทศไทยในขั้นก่อนหน้า";
-          return render();
+      /**
+       * วันครบกำหนดรายงานตัว 90 วันครั้งถัดไป = วันที่เข้าไทย + 90 วัน ไปเรื่อย ๆ
+       * จนถึงรอบที่ยังไม่เลยกำหนดเกิน 7 วัน (ช่วงที่ยังรายงานตัวออนไลน์ได้) → { d: วันที่, n: รอบที่ }
+       */
+      function calc90(arrival) {
+        if (!arrival) return null;
+        let d = addDays(arrival, 90),
+          n = 1;
+        while (days(d) < -7) {
+          d = addDays(d, 90);
+          n++;
         }
-        let d = addDays(S.p.arrivalDate, 90);
-        while (days(d) < -7) d = addDays(d, 90);
-        S.p.report90 = d;
-        delete S.ob.err.report90;
-        render();
+        return { d, n };
       }
       /** ตรวจข้อมูลของขั้นปัจจุบัน → คืน object error */
       function obCheck() {
@@ -5121,7 +5114,8 @@
           ["arrivalDate", "purpose"].forEach((k) => req(k));
         }
         if (st === 2) {
-          ["visa", "visaNo", "report90"].forEach((k) => req(k));
+          ["visa", "visaNo"].forEach((k) => req(k));
+          if (!p.report90) e.report90 = "กรุณากรอกวันที่เดินทางเข้าประเทศไทยในขั้นข้อมูลการเดินทาง";
           if (p.visa === OB_VISA_UNKNOWN) e.visa = "กรุณาติดต่อเจ้าหน้าที่เพื่อยืนยันประเภทวีซ่าก่อนดำเนินการต่อ";
           if (p.visaNo && !/^[A-Z0-9]{6,12}$/i.test(p.visaNo.trim())) e.visaNo = "หมายเลขวีซ่าต้องเป็นตัวอักษร/ตัวเลข 6–12 ตัว";
         }
@@ -5221,7 +5215,6 @@
       }
       function demoStay() {
         seedStay(S.p);
-        if (S.errors) delete S.errors.passNo;
         toast("เจ้าของที่พักแจ้ง ตม.30 แล้ว (จำลอง) · ดึงที่อยู่มาให้อัตโนมัติ");
         render();
       }
@@ -5280,18 +5273,6 @@
             w.querySelector(".errmsg")?.remove();
           }
         }
-        if (S.svc === "tm30" && id === "passNo") {
-          const st = tm30Match(S.p) ? "ok" : normPass(v).length >= 6 ? "no" : "";
-          if (st !== S.form._pm) {
-            S.form._pm = st;
-            render();
-            const el = document.querySelector("#w_passNo input");
-            if (el) {
-              el.focus();
-              el.setSelectionRange(el.value.length, el.value.length);
-            }
-          }
-        }
         if (S.svc === "report90" && id === "stay") render(); // แสดง/ซ่อนช่องที่อยู่
       }
       /** ตรวจความถูกต้องของฟอร์ม (ช่องบังคับ + กฎเฉพาะบริการ) ถ้าผ่านไปหน้า Check */
@@ -5306,10 +5287,6 @@
           S.errors.ret = "วันเดินทางกลับต้องอยู่หลังวันเดินทางออก";
         if (S.svc === "reentry" && S.form.depart && S.form.depart < iso8(TODAY))
           S.errors.depart = "วันเดินทางออกต้องไม่ใช่วันที่ผ่านมาแล้ว";
-        if (S.svc === "tm30" && S.form.passNo) {
-          if (!tm30Match(S.p)) S.errors.passNo = "หมายเลขหนังสือเดินทางไม่ตรงกับข้อมูลส่วนตัว";
-          else if (!S.p.address) S.errors.passNo = "ยังไม่มีข้อมูลการแจ้งที่พักในระบบ";
-        }
         if (S.svc === "report90" && S.form.ownerPhone && !/^0\d{8,9}$/.test(S.form.ownerPhone.replace(/[\s-]/g, "")))
           S.errors.ownerPhone = "ใช้เบอร์ในไทย เช่น 089-000-1122";
         if (S.svc === "report90" && S.form.stay === "ย้ายที่พักแล้ว") {
@@ -5637,6 +5614,9 @@
   ${inp("purpose", "วัตถุประสงค์ในการเดินทางเข้าประเทศไทย (Purpose of travel)", { type: "select", opts: OB_PURPOSES })}</div>`;
           cta = "ถัดไป: วีซ่าและการพำนัก";
         } else if (st === 2) {
+          // วันรายงานตัว 90 วัน: ระบบคำนวณจากวันที่เข้าไทยเสมอ (ไม่ต้องกรอกเอง)
+          const c90 = calc90(p.arrivalDate);
+          p.report90 = c90 ? c90.d : "";
           const d90 = p.report90 ? days(p.report90) : null;
           const lateNote =
             d90 !== null && d90 < 0
@@ -5650,7 +5630,10 @@
   <div class="card mt12"><div class="ob-h"><b>วีซ่าและการพำนัก</b><small>ใช้คำนวณวันต่อวีซ่าและวันรายงานตัวให้อัตโนมัติ</small></div>${sampleBtn}
   ${inp("visa", "ประเภทวีซ่า", { type: "select", opts: ["Non-Immigrant ED", "Non-Immigrant ED Plus", OB_VISA_UNKNOWN], hint: 'ถ้าไม่แน่ใจ เลือก "ไม่ทราบ" แล้วติดต่อเจ้าหน้าที่', after: unknownBox })}
   ${inp("visaNo", "หมายเลขวีซ่า", { ex: "B4471026", hint: "ตัวเลขบนสติกเกอร์วีซ่า" })}
-  ${inp("report90", "ครบกำหนดรายงานตัว 90 วันครั้งถัดไป", { type: "date", hint: "ดูจากใบรับรายงานตัวครั้งก่อน", after: `<a class="lnk" onclick="obCalc90()">${ic("cal", 14)} คำนวณจากวันที่เข้าประเทศไทย</a>${lateNote}` })}</div>`;
+  <div class="field ${e.report90 ? "err" : ""}" id="w_report90"><label>ครบกำหนดรายงานตัว 90 วันครั้งถัดไป <i>*</i>${c90 ? `<span class="autotag">${ic("check", 12)} คำนวณอัตโนมัติ</span>` : ""}</label>
+   <div class="ro-box ${c90 ? "" : "empty"}">${c90 ? fd(c90.d) : "กรอกวันที่เดินทางเข้าประเทศไทยในขั้นก่อนหน้า"}</div>
+   ${e.report90 ? `<div class="errmsg">${ic("alert", 14)} ${e.report90}</div>` : ""}
+   ${c90 ? `<div class="ro-note">${ic("cal", 13)} นับจากวันที่เข้าประเทศไทย ${fd(p.arrivalDate)} บวกเพิ่มทุก 90 วัน · รอบที่ ${c90.n}</div>` : ""}${lateNote}</div></div>`;
           cta = "ถัดไป: การศึกษา";
         } else if (st === 3) {
           const levels = OB_LEVELS[p.schoolType] || [];
@@ -5918,8 +5901,8 @@
           const go2 =
             f.edit === "tm30"
               ? f.v
-                ? `หากย้ายที่พัก <a class="lnk" onclick="openSvc('tm30')">แจ้งที่พักใหม่ (ตม.30)</a>`
-                : `<a class="lnk" onclick="pullTm30()">${ic("upload", 14)} อัปโหลดใบ ตม.30</a> หรือ <a class="lnk" onclick="openSvc('tm30')">แจ้งที่พัก</a>`
+                ? `หากย้ายที่พัก ให้เจ้าของที่พักใหม่แจ้ง ตม.30 · <a class="lnk" onclick="openSvc('tm30')">ตรวจสอบข้อมูลแจ้งที่พัก</a>`
+                : `<a class="lnk" onclick="pullTm30()">${ic("upload", 14)} อัปโหลดใบ ตม.30</a> หรือ <a class="lnk" onclick="openSvc('tm30')">ตรวจสอบข้อมูลแจ้งที่พัก</a>`
               : `หากต้องการแก้ไข <a class="lnk" onclick="tab('profile')">ไปแก้ที่หน้าข้อมูลส่วนตัว ›</a>`;
           return `<div class="field ${e ? "err" : ""}" id="w_${f.id}"><label>${f.l}${f.req ? " <i>*</i>" : ""}${f.v ? `<span class="autotag">${ic("check", 12)} ${f.src}</span>` : ""}</label><div class="ro-box ${f.v ? "" : "empty"}">${f.v ? esc(f.v) : f.empty}</div>${e ? `<div class="errmsg">${ic("alert", 14)} ${e}</div>` : ""}<div class="ro-note">${go2}</div></div>`;
         }
@@ -5956,6 +5939,12 @@
           e = elig(S.svc),
           fs = s.fields(p),
           r = reqOf(S.svc);
+        if (S.svc === "tm30")
+          return `${appbar(s.short)}
+ <div class="content">
+ <div class="svc-head"><span class="ri ${s.c}">${ic(s.ic, 26)}</span><div><h2>${s.name}</h2><p>${s.sub}</p></div></div>
+ ${tm30View(p)}
+ </div>`;
         const fee =
           S.svc === "reentry" ? (S.form.type === "multiple" ? "3,800 บาท" : "1,000 บาท") : s.fee;
         // นับจากสถานะเดียวกับหน้า Check (S.docs) เพื่อให้สองหน้าแสดงผลตรงกัน
@@ -6012,15 +6001,7 @@
   <div class="sec-title">กรอกข้อมูล</div>
   <div class="card">${fs.map(field).join("")}
    <div class="kv" style="border-top:1px solid var(--line);margin-top:4px;padding-top:12px"><span>ค่าธรรมเนียม</span><b>${fee}</b></div></div>
-  ${
-    S.svc === "tm30"
-      ? `<div class="sec-title">คำแนะนำสำหรับการย้ายที่พัก</div><div class="card tips"><ol>
-  <li><b>แจ้งเจ้าของที่พักเก่า</b>ว่าจะย้ายออกวันไหน เพื่อให้รับทราบและจัดการเรื่องสัญญาเช่า เงินประกัน และค่าใช้จ่ายต่าง ๆ</li>
-  <li><b>แจ้งวันย้ายออกให้ชัดเจน</b>เพื่อให้เจ้าของที่พักเก่าจัดการข้อมูลผู้เข้าพักตามระบบของตน</li>
-  <li><b>แจ้งเจ้าของที่พักใหม่</b>ให้ดำเนินการ TM.30 ภายใน 24 ชั่วโมงหลังเข้าพัก</li></ol>
-  <div class="tips-note">${ic("doc", 16)}<span>เก็บหลักฐาน TM.30 ของที่พักใหม่ไว้ใช้เมื่อติดต่อสำนักงานตรวจคนเข้าเมือง</span></div></div>`
-      : ""
-  }`;
+`;
         return `${appbar(s.short)}
  <div class="content">
  <div class="svc-head"><span class="ri ${s.c}">${ic(s.ic, 26)}</span><div><h2>${s.name}</h2><p>${s.sub}</p></div></div>
