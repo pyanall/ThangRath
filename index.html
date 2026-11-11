@@ -9,6 +9,7 @@
     ข้อมูลทั้งหมดเป็นข้อมูลสมมติ ไม่มีการเชื่อมต่อระบบจริง วันที่ "วันนี้" ใช้วันที่ปัจจุบันจริงของเครื่อง
 
   เส้นทางผู้ใช้ (User flow)
+    landing (หน้าแรกทางรัฐ: ส่วนคนไทย = ปุ่มจำลอง / ส่วนชาวต่างชาติ → login)
     login → onboard (ตั้งค่าบัญชี 5 ขั้น: ข้อมูลส่วนตัว · การเดินทาง · วีซ่า · การศึกษา · เอกสาร) → home
     home → select (เลือกบริการ) → form (รายละเอียด + กรอกข้อมูล) → check (ตรวจเอกสาร)
          → ส่งคำขอ → modal (หมายเลขอ้างอิง) → track (ติดตามสถานะ + ไทม์ไลน์ + นัดหมาย)
@@ -115,29 +116,132 @@
         cursor: pointer;
         text-align: inherit;
       }
-      .device {
-        width: 390px;
-        height: 844px;
-        background: var(--bg);
-        border-radius: 46px;
+      /* --- กรอบ iPhone 17 (จอ 393×852) --- */
+      .phone {
+        position: relative;
+        padding: 4px;
+        border-radius: 70px;
+        /* ขอบอะลูมิเนียมโทนฟ้าเทา */
+        background: linear-gradient(145deg, #e6edf5 0%, #a9b9ca 22%, #dfe7f0 48%, #9eafc2 74%, #e3eaf2 100%);
         box-shadow:
-          0 0 0 11px #0c1322,
-          0 30px 70px rgba(1, 74, 173, 0.18);
+          inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+          0 40px 80px rgba(1, 45, 110, 0.22),
+          0 10px 24px rgba(1, 45, 110, 0.12);
+        margin: 24px 0;
+      }
+      .bezel {
+        padding: 11px;
+        border-radius: 66px;
+        background: #05070b;
+      }
+      .pbtn {
+        position: absolute;
+        width: 4px;
+        border-radius: 3px;
+        background: linear-gradient(90deg, #8d9eb2, #d7e0ea);
+      }
+      .pbtn.act {
+        left: -3px;
+        top: 150px;
+        height: 34px;
+      }
+      .pbtn.vup {
+        left: -3px;
+        top: 214px;
+        height: 62px;
+      }
+      .pbtn.vdn {
+        left: -3px;
+        top: 290px;
+        height: 62px;
+      }
+      .pbtn.pwr {
+        right: -3px;
+        top: 236px;
+        height: 96px;
+        background: linear-gradient(90deg, #d7e0ea, #8d9eb2);
+      }
+      .pbtn.cam {
+        right: -3px;
+        top: 560px;
+        height: 54px;
+        background: linear-gradient(90deg, #d7e0ea, #8d9eb2);
+      }
+      /* Dynamic Island */
+      .island {
+        position: absolute;
+        top: 11px;
+        left: 50%;
+        width: 124px;
+        height: 36px;
+        margin-left: -62px;
+        border-radius: 20px;
+        background: #000;
+        z-index: 200;
+        pointer-events: none;
+      }
+      .island i {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        width: 11px;
+        height: 11px;
+        margin-top: -5.5px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, #2a3b5c 0, #0b1220 60%);
+      }
+      .device {
+        width: 393px;
+        height: 852px;
+        background: var(--bg);
+        border-radius: 55px;
         overflow: hidden;
         position: relative;
         display: flex;
         flex-direction: column;
       }
       .statusbar {
-        height: 44px;
+        height: 54px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0 30px;
-        font-size: 14px;
+        padding: 4px 34px 0 46px;
+        font-size: 16px;
         font-weight: 600;
+        letter-spacing: -0.2px;
         flex-shrink: 0;
         background: #fff;
+        color: #000;
+      }
+      .sb-ic {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .batt {
+        width: 25px;
+        height: 12px;
+        border-radius: 4px;
+        border: 1.2px solid rgba(0, 0, 0, 0.38);
+        padding: 1.5px;
+        position: relative;
+      }
+      .batt::after {
+        content: "";
+        position: absolute;
+        right: -4px;
+        top: 3.5px;
+        width: 2px;
+        height: 4px;
+        border-radius: 0 2px 2px 0;
+        background: rgba(0, 0, 0, 0.38);
+      }
+      .batt i {
+        display: block;
+        height: 100%;
+        width: 80%;
+        border-radius: 2px;
+        background: #000;
       }
       .statusbar.dark {
         background: #0857c4; /* ต่อเนื่องกับสีด้านบนของ .hero */
@@ -154,6 +258,19 @@
           height: 100dvh;
           border-radius: 0;
           box-shadow: none;
+        }
+        /* บนมือถือจริง: ไม่แสดงกรอบ ปุ่มข้าง และ Dynamic Island */
+        .phone,
+        .bezel {
+          padding: 0;
+          margin: 0;
+          border-radius: 0;
+          background: none;
+          box-shadow: none;
+        }
+        .pbtn,
+        .island {
+          display: none;
         }
         .statusbar {
           display: none;
@@ -3883,12 +4000,382 @@
           animation: none !important;
         }
       }
+      /* ==================================================================
+         หน้า LANDING (หน้าแรกของแอปทางรัฐ ตามดีไซน์เดิม) + ปุ่มชาวต่างชาติ
+         ================================================================== */
+      .device.landing-bg {
+        background: #fff;
+      }
+      .device.landing-bg .statusbar {
+        background: transparent;
+      }
+      .land {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden; /* ทุกอย่างอยู่ในหน้าเดียว — ภาพประกอบย่อตามพื้นที่ที่เหลือ */
+        padding: 0 20px 18px;
+        display: flex;
+        flex-direction: column;
+      }
+      .land > * {
+        flex-shrink: 0;
+      }
+      .land > .land-art-w {
+        flex: 1 1 0;
+        flex-shrink: 1;
+        min-height: 0;
+        display: flex;
+        justify-content: center;
+        margin: 0 -20px;
+      }
+      .land-art {
+        display: block;
+        height: 100%;
+        width: auto;
+        max-width: 100%;
+        object-fit: contain;
+        /* ขอบซ้าย-ขวาจางกลืนกับพื้นขาว เมื่อภาพถูกย่อ */
+        -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+        mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+      }
+      .land-h {
+        font-size: 27px;
+        line-height: 1.32;
+        font-weight: 700;
+        color: #2b2b2b;
+        margin: 4px 0 14px;
+      }
+      .land-btn {
+        width: 100%;
+        height: 46px;
+        border-radius: 99px;
+        font-size: 16px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .land-btn.reg {
+        background: #12924f;
+        color: #fff;
+        font-size: 18px;
+      }
+      .land-btn.in {
+        background: #fff;
+        color: #12924f;
+        border: 1px solid #4a8d6a;
+      }
+      .land-btn.thaid {
+        margin-top: 12px;
+        background: #0d0f4f;
+        color: #fff;
+        font-weight: 600;
+      }
+      /* ส่วนชาวต่างชาติ: การ์ดไล่สีน้ำเงิน */
+      .land-or.fx {
+        margin: 14px 0 8px;
+        color: var(--blue);
+        font-weight: 600;
+      }
+      .land-or.fx::before,
+      .land-or.fx::after {
+        background: var(--blue-100);
+      }
+      .land-fx {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        text-align: left;
+        padding: 12px 14px 12px 12px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, var(--navy) 0%, #0b5fd0 60%, var(--blue) 100%);
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(1, 74, 173, 0.28);
+        position: relative;
+        overflow: hidden;
+      }
+      .land-fx::after {
+        content: "";
+        position: absolute;
+        right: -36px;
+        top: -46px;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .lfx-ic {
+        width: 46px;
+        height: 46px;
+        border-radius: 13px;
+        background: rgba(255, 255, 255, 0.16);
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+      .lfx-t {
+        flex: 1;
+        line-height: 1.3;
+      }
+      .lfx-t b {
+        display: block;
+        font-size: 16px;
+      }
+      .lfx-t .badge {
+        font-size: 10.5px;
+        vertical-align: 2px;
+      }
+      .lfx-t small {
+        font-size: 12.5px;
+        opacity: 0.85;
+      }
+      .thaid-b {
+        height: 22px;
+        width: auto;
+        border-radius: 5px;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+      }
+      .land-or {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 10px 0;
+        font-size: 12px;
+        color: #9aa3ad;
+      }
+      .land-or::before,
+      .land-or::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #e6e9ec;
+      }
+      .land-safe {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 12px;
+        font-size: 13px;
+        color: #555;
+      }
+      .login-back {
+        position: relative;
+        z-index: 2;
+        background: #fff;
+        box-shadow: var(--sh-1);
+        margin: 0 0 -40px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .land-art {
+          animation: none;
+        }
+      }
+      /* --- TDAC: โลโก้ QR + หน้าสแกน QR --- */
+      .tdac-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: #0e5393;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 4px 10px rgba(14, 83, 147, 0.25);
+      }
+      .tdac-logo img {
+        height: 74%;
+        width: auto;
+      }
+      .tdac-logo i {
+        font-style: normal;
+        font-size: 8.5px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        margin-top: -1px;
+      }
+      .tdac-logo.lg {
+        width: 56px;
+        height: 56px;
+      }
+      .blk-h .tdac-logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+      }
+      .qr-scan {
+        margin-top: 12px;
+        background: #0b1220;
+        color: #fff;
+        border-radius: 22px;
+        padding: 22px 16px 18px;
+        text-align: center;
+      }
+      .qr-scan b {
+        display: block;
+        margin-top: 14px;
+        font-size: 15px;
+      }
+      .qr-scan small {
+        font-size: 12.5px;
+        opacity: 0.7;
+      }
+      .qr-frame {
+        position: relative;
+        width: 170px;
+        height: 170px;
+        margin: 0 auto;
+        display: grid;
+        place-items: center;
+        color: rgba(255, 255, 255, 0.35);
+        overflow: hidden;
+      }
+      .qr-frame .c {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border: 4px solid #7cf0b6;
+      }
+      .qr-frame .tl {
+        left: 0;
+        top: 0;
+        border-right: 0;
+        border-bottom: 0;
+        border-radius: 12px 0 0 0;
+      }
+      .qr-frame .tr {
+        right: 0;
+        top: 0;
+        border-left: 0;
+        border-bottom: 0;
+        border-radius: 0 12px 0 0;
+      }
+      .qr-frame .bl {
+        left: 0;
+        bottom: 0;
+        border-right: 0;
+        border-top: 0;
+        border-radius: 0 0 0 12px;
+      }
+      .qr-frame .br {
+        right: 0;
+        bottom: 0;
+        border-left: 0;
+        border-top: 0;
+        border-radius: 0 0 12px 0;
+      }
+      .tdac-found b {
+        display: block;
+        font-size: 15px;
+      }
+      .tdac-found small {
+        font-size: 12px;
+        color: var(--ink-2);
+      }
+      .tw-ic.sm {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+      }
+      /* --- หน้าเลือกวิธีลงทะเบียน: THIM / TDAC (ดึงข้อมูลอัตโนมัติ) + สมัครใหม่ --- */
+      .reg-h {
+        text-align: center;
+        margin: 36px 0 14px; /* เว้นระยะจากแถบเลือกภาษา */
+      }
+      .reg-h b {
+        display: block;
+        font-size: 18px;
+        color: var(--navy);
+      }
+      .reg-h small {
+        font-size: 12.5px;
+        color: var(--ink-2);
+      }
+      /* ปุ่มแนวนอนทรงแคปซูล สีตามโลโก้ (แบบหน้าแรกทางรัฐ) */
+      .regp {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        height: 54px;
+        border-radius: 99px;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .regp img {
+        height: 34px;
+        width: auto;
+        border-radius: 9px;
+      }
+      .regp.thim {
+        background: #0a6fe6;
+        box-shadow: 0 6px 16px rgba(10, 111, 230, 0.3);
+      }
+      .regp.thim img {
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+      }
+      .regp.tdac {
+        background: #0e5393;
+        box-shadow: 0 6px 16px rgba(14, 83, 147, 0.3);
+      }
+      .regp.tdac img {
+        border-radius: 0;
+      }
+      .regs {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        text-align: left;
+        padding: 12px 14px;
+        border-radius: 18px;
+        background: #fff;
+        border: 1.5px solid var(--navy);
+        color: var(--navy);
+        box-shadow: var(--sh-1);
+      }
+      .regs .rt-n {
+        position: static;
+        background: var(--navy);
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .regs b {
+        display: block;
+        font-size: 15.5px;
+      }
+      .regs small {
+        display: block;
+        font-size: 12px;
+        color: var(--ink-2);
+      }
+      /* หน้าเลือกวิธีลงทะเบียน: ย่อโลโก้ให้ทุกอย่างพอดีจอ */
+      .login-hero .login-logo {
+        width: 120px;
+      }
+      .login-hero h1 {
+        font-size: 19px;
+      }
     </style>
   </head>
   <body>
     <!-- กรอบโทรศัพท์ (บนจอเล็กกว่า 520px จะขยายเต็มจอแทน) -->
+    <!-- กรอบ iPhone 17: ขอบอะลูมิเนียม + ขอบจอดำ + ปุ่มด้านข้าง + Dynamic Island -->
+    <div class="phone">
+      <span class="pbtn act"></span><span class="pbtn vup"></span><span class="pbtn vdn"></span>
+      <span class="pbtn pwr"></span><span class="pbtn cam"></span>
+      <div class="bezel">
     <div class="device" id="device">
-      <div class="statusbar" id="sb"><span>9:41</span><span>●●●● 5G ▮</span></div>
+      <div class="island" aria-hidden="true"><i></i></div>
+      <div class="statusbar" id="sb"><span class="sb-time">9:41</span><span class="sb-ic"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.2c2.4 0 4.6.9 6.3 2.5l1.2-1.3A10.6 10.6 0 0 0 8 .4 10.6 10.6 0 0 0 .5 3.4l1.2 1.3A9 9 0 0 1 8 2.2zm0 3.4c1.5 0 2.9.6 4 1.6l1.2-1.3A7.4 7.4 0 0 0 8 3.8a7.4 7.4 0 0 0-5.2 2.1L4 7.2a5.7 5.7 0 0 1 4-1.6zm0 3.3c.6 0 1.2.2 1.6.6L8 11.6 6.4 9.5c.4-.4 1-.6 1.6-.6z"/></svg><span class="batt"><i></i></span></span></div>
       <!-- #screen    : หน้าจอหลัก — render() เขียน HTML ของหน้าปัจจุบันลงที่นี่
            #sheetwrap : Help sheet (เลื่อนขึ้นจากด้านล่าง) — renderSheet()
            #modalwrap : หน้าต่างยืนยันหลังส่งคำขอ — showModal()
@@ -3897,6 +4384,8 @@
       <div id="sheetwrap"></div>
       <div id="modalwrap"></div>
       <div id="toast"></div>
+    </div>
+      </div>
     </div>
     <script>
       /* ==================================================================
@@ -3949,6 +4438,10 @@
         play: '<path d="M7 5l12 7-12 7z"/>',
         mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
         phone: '<rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/>',
+        heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+        hospital: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/>',
+        bus: '<rect x="5" y="3.5" width="14" height="14" rx="3"/><path d="M5 11h14M8 20.5v-3M16 20.5v-3"/><circle cx="8.5" cy="14.5" r=".6"/><circle cx="15.5" cy="14.5" r=".6"/>',
+        qr: '<rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.2"/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 19h2M19 14v2"/>',
         search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
         pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
       };
@@ -4090,6 +4583,28 @@
         ["visaNo", "หมายเลขวีซ่า"],
         ["email", "อีเมล"],
       ];
+      /** ข้อมูลที่อ่านได้จาก QR Code ของ TDAC (Thailand Digital Arrival Card) — มีข้อมูลการเดินทางเข้าไทยด้วย */
+      const TDAC_FIELDS = [
+        ["name", "ชื่อ-นามสกุล"],
+        ["passport", "หมายเลขหนังสือเดินทาง"],
+        ["nat", "สัญชาติ"],
+        ["gender", "เพศ"],
+        ["dob", "วันเดือนปีเกิด"],
+        ["occupation", "อาชีพ"],
+        ["country", "ประเทศที่พำนัก"],
+        ["city", "เมืองที่พำนัก"],
+        ["visaNo", "หมายเลขวีซ่า"],
+        ["email", "อีเมล"],
+        ["arrivalDate", "วันที่เดินทางเข้าไทย"],
+        ["purpose", "วัตถุประสงค์การเดินทาง"],
+      ];
+      /** ตราสำนักงานตรวจคนเข้าเมือง (ใช้เป็นโลโก้ TDAC) */
+      const TDAC_BADGE = "data:image/webp;base64,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";
+      /** ข้อมูลอ้างอิงของใบ TDAC ตัวอย่าง (แสดงผลเท่านั้น) */
+      const TDAC_META = { no: "TDAC-2512-8F3KQ", flight: "MU741 · คุนหมิง → กรุงเทพฯ" };
+      /** แหล่งข้อมูลที่ดึงอัตโนมัติ: โลโก้/ชื่อ ตามวิธีเข้าใช้งาน */
+      const SRC_NAME = { thim: "THIM", tdac: "TDAC" };
+      const srcFields = (m) => (m === "thim" ? THIM_FIELDS : m === "tdac" ? TDAC_FIELDS : []);
       /** ผู้ใช้เปล่า (ทุกช่องว่าง) — ใช้ตอนเริ่มสมัคร/ลงชื่อเข้าใช้ */
       function blankUser() {
         const p = {};
@@ -4428,7 +4943,7 @@
        * help        : สถานะ Help sheet (เปิด/แท็บ/ประวัติแชท)
        * ================================================================== */
       const S = {
-        screen: "login",
+        screen: "landing", // หน้าแรกของแอปทางรัฐ (เลือก: คนไทย / ชาวต่างชาติ)
         hist: [],
         p: null,
         auth: null, // สถานะหน้าเข้าสู่ระบบ/สมัคร (ดู authStart)
@@ -4492,6 +5007,7 @@
         if (n) n.scrollTop = st;
         const dev = document.getElementById("device");
         dev.classList.toggle("login-bg", S.screen === "login");
+        dev.classList.toggle("landing-bg", S.screen === "landing");
         dev.classList.toggle("home-bg", S.screen === "home");
         document.getElementById("sb").className = "statusbar"; // หน้า Home พื้นสว่างแล้ว ไม่ต้องใช้ตัวอักษรขาว
         if (S.screen === "home") runCountdown();
@@ -4916,7 +5432,7 @@
       };
       /** เริ่มเข้าสู่ระบบตามวิธีที่เลือก */
       function authStart(mode) {
-        S.auth = { mode, via: "app", pass: "", email: "", sent: false, otp: "", busy: false, err: {} };
+        S.auth = { mode, via: mode === "tdac" ? "scan" : "app", pass: "", email: "", sent: false, otp: "", busy: false, err: {}, qr: null };
         go("auth");
       }
       /** อัปเดตช่องในหน้าเข้าสู่ระบบ (ไม่ render ทั้งหน้า) */
@@ -4935,7 +5451,9 @@
       function authSendOtp() {
         const a = S.auth;
         a.err = {};
-        if (a.mode === "thim") {
+        if (a.mode === "tdac") {
+          // อีเมลมาจากใบ TDAC ที่สแกนแล้ว ไม่ต้องกรอก
+        } else if (a.mode === "thim") {
           if (!a.pass.trim()) a.err.pass = "กรุณากรอกเลขหนังสือเดินทาง";
           else if (a.pass.trim().toUpperCase() !== SAMPLE.passport)
             a.err.pass = "ไม่พบเลขหนังสือเดินทางนี้ในระบบ THIM (ทดลองใช้ " + SAMPLE.passport + ")";
@@ -4944,7 +5462,7 @@
         a.sent = true;
         a.otp = "";
         render();
-        toast(`ส่งรหัส OTP ไปที่ ${maskEmail(a.mode === "thim" ? SAMPLE.email : a.email.trim())} แล้ว`);
+        toast(`ส่งรหัส OTP ไปที่ ${maskEmail(a.mode === "signup" ? a.email.trim() : SAMPLE.email)} แล้ว`);
       }
       /** ยืนยัน OTP */
       function authVerify() {
@@ -4967,15 +5485,27 @@
           setTimeout(() => S.screen === "auth" && startUser(), 700);
         }, 1400);
       }
+      /** อ่าน QR Code ของ TDAC (จำลอง): สแกนด้วยกล้อง หรือเลือกรูป/ไฟล์ PDF จากอีเมล TDAC */
+      function authTdacScan(how) {
+        S.auth.qr = "busy";
+        S.auth.via = how;
+        render();
+        setTimeout(() => {
+          if (S.screen !== "auth" || !S.auth) return;
+          S.auth.qr = "done";
+          render();
+          toast("อ่าน QR Code ของ TDAC สำเร็จ");
+        }, 1600);
+      }
       /** เริ่มผู้ใช้ใหม่หลังยืนยันตัวตน → ไปขั้นตอนตั้งค่าบัญชี */
       function startUser() {
         const m = S.auth.mode;
         S.p = blankUser();
-        if (m === "thim") THIM_FIELDS.forEach(([k]) => (S.p[k] = SAMPLE[k]));
+        if (m === "thim" || m === "tdac") srcFields(m).forEach(([k]) => (S.p[k] = SAMPLE[k]));
         else S.p.email = S.auth.email.trim();
         S.p.initials = initialsOf(S.p.name);
         S.ob = { step: 0, mode: m, err: {}, up: {}, scan: {}, src: {}, extraOpen: false };
-        if (m === "thim") THIM_FIELDS.forEach(([k]) => (S.ob.src[k] = "thim"));
+        srcFields(m).forEach(([k]) => (S.ob.src[k] = m));
         S.cdDone = false;
         S.confirmed = false;
         S.requests = [];
@@ -4994,7 +5524,7 @@
         S.hist = [];
         S.screen = "onboard";
         render(true);
-        toast(m === "thim" ? "ยืนยันตัวตนสำเร็จ · ดึงข้อมูลจาก THIM แล้ว" : "ยืนยันอีเมลสำเร็จ");
+        toast(SRC_NAME[m] ? `ยืนยันตัวตนสำเร็จ · ดึงข้อมูลจาก ${SRC_NAME[m]} แล้ว` : "ยืนยันอีเมลสำเร็จ");
       }
       /* ---------- ONBOARDING (ตั้งค่าบัญชีครั้งแรก 5 ขั้น) ----------
          0 ข้อมูลส่วนตัว (THIM: ดึงมา + เพิ่มเอง / สมัครใหม่: สแกนพาสปอร์ต + กรอกเอง)
@@ -5059,7 +5589,7 @@
       /** (ปุ่มเดโม) เติมข้อมูลตัวอย่างของขั้นปัจจุบัน — ไม่ทับข้อมูลที่ดึงจาก THIM */
       function obSample() {
         OB_STEP_KEYS[S.ob.step].forEach((k) => {
-          if (S.ob.src[k] !== "thim") S.p[k] = SAMPLE[k];
+          if (!SRC_NAME[S.ob.src[k]]) S.p[k] = SAMPLE[k];
         });
         S.p.initials = initialsOf(S.p.name);
         S.ob.err = {};
@@ -5488,13 +6018,45 @@
         if (nr) nr.style.display = n ? "none" : "";
       }
 
+      /* ---------- หน้า LANDING : หน้าแรกของแอปทางรัฐ ----------
+         ส่วนคนไทย (ลงทะเบียน / เข้าสู่ระบบ / ThaID) เป็นปุ่มจำลอง — ต้นแบบนี้สาธิตเฉพาะส่วนชาวต่างชาติ
+         ส่วนชาวต่างชาติ → ไปหน้า LOGIN เดิม (THIM / สมัครใหม่) */
+      function landTH() {
+        toast("ต้นแบบนี้สาธิตเฉพาะบริการสำหรับชาวต่างชาติ");
+      }
+      /** กลับหน้าแรก (ปุ่มย้อนกลับบนหน้าเข้าสู่ระบบของชาวต่างชาติ) */
+      function toLanding() {
+        FX.nav = "back";
+        S.hist = [];
+        S.screen = "landing";
+        render(true);
+      }
+      /** โลโก้ ThaID */
+      const THAID_LOGO = "data:image/webp;base64,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";
+      /** ภาพประกอบหน้าแรกของแอปทางรัฐ */
+      const LAND_ART = "data:image/webp;base64,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";
+      SCREENS.landing = () => `<div class="land">
+ <div class="land-art-w"><img class="land-art" src="${LAND_ART}" alt=""></div>
+ <h1 class="land-h">ติดต่อรัฐ<br>ง่ายแค่ปลายนิ้ว</h1>
+ <button class="land-btn reg" onclick="landTH()">ลงทะเบียน</button>
+ <div class="land-or">หรือ</div>
+ <button class="land-btn in" onclick="landTH()">เข้าสู่ระบบ</button>
+ <button class="land-btn thaid" onclick="landTH()"><img class="thaid-b" src="${THAID_LOGO}" alt="ThaID">เข้าสู่ระบบด้วย ThaID</button>
+ <div class="land-or fx">สำหรับชาวต่างชาติ · For foreigners</div>
+ <button class="land-fx" onclick="go('login')"><span class="lfx-ic">${ic("globe", 24)}</span><span class="lfx-t"><b>ชาวต่างชาติในประเทศไทย <span class="badge b-leaf">ใหม่</span></b><small>Foreigners in Thailand · 外国人</small></span>${ic("chev", 20)}</button>
+ <div class="land-safe">${ic("help", 18)}เรารักษาความปลอดภัยของข้อมูลของคุณ</div>
+ </div>`;
+
       /* ---------- หน้า LOGIN : เลือกวิธีเข้าสู่ระบบ (THIM / สมัครใหม่) ---------- */
       SCREENS.login = () => `<div class="content">
+ <button class="iconbtn login-back" onclick="toLanding()" aria-label="กลับหน้าแรก">${ic("back", 24)}</button>
  <div class="login-hero"><img class="login-logo" src="${LOGO}" alt="ทางรัฐ"><h1>บริการนักศึกษาต่างชาติ</h1><p>วีซ่าและการพำนักในไทย</p><span class="proto-tag">ต้นแบบ · ข้อมูลจำลอง</span></div>
  <div class="lang">${["ไทย", "English", "中文"].map((l, i) => `<button class="chip ${i ? "" : "on"}" onclick="toast('ต้นแบบนี้แสดงผลภาษาไทย')">${l}</button>`).join("")}</div>
- <div class="sec-title">เลือกวิธีเข้าใช้งาน</div>
- <button class="authopt" onclick="authStart('thim')"><img class="thim-logo" src="${THIM_LOGO}" alt="THIM"><span class="sp"><b>ลงชื่อเข้าใช้ด้วย THIM <span class="badge b-leaf">แนะนำ</span></b><small>ดึงข้อมูลผู้เดินทางจากแอป THIM อัตโนมัติ ไม่ต้องกรอกซ้ำ</small></span>${ic("chev", 18)}</button>
- <button class="authopt" onclick="authStart('signup')"><span class="ao-ic">${ic("user", 24)}</span><span class="sp"><b>สมัครใช้งานใหม่</b><small>กรอกข้อมูลเอง สแกนหนังสือเดินทางช่วยกรอกให้ได้</small></span>${ic("chev", 18)}</button>
+ <div class="reg-h"><b>เลือกวิธีลงทะเบียน</b></div>
+ <button class="regp thim" onclick="authStart('thim')"><img src="${THIM_LOGO}" alt="THIM">ลงชื่อเข้าใช้ด้วย THIM</button>
+ <button class="regp tdac" onclick="authStart('tdac')"><img src="${TDAC_BADGE}" alt="TDAC">ดึงข้อมูลจาก TDAC</button>
+ <div class="land-or">หรือ</div>
+ <button class="regs" onclick="authStart('signup')"><span class="ao-ic">${ic("user", 24)}</span><b class="sp">สมัครใช้งานใหม่</b>${ic("chev", 20)}</button>
  <div class="login-note">${ic("shield", 16)}<span>ยืนยันตัวตนด้วยรหัส OTP ทางอีเมล ไม่ใช้ SMS เพราะหลายคนเปลี่ยนเบอร์มือถือเมื่อมาอยู่ไทย</span></div>
  </div>`;
 
@@ -5508,7 +6070,25 @@
   ${fld("otp", "รหัส OTP", { im: "numeric", max: 6, ph: "••••••", hint: "รหัสสำหรับทดลอง: 123456" })}
   <div class="flex" style="justify-content:space-between"><a class="lnk" onclick="authSendOtp()">ส่งรหัสอีกครั้ง</a><a class="lnk" onclick="S.auth.otp='123456';render()">${ic("spark", 14)} ใส่รหัสทดลอง</a></div>`;
         let body, cta;
-        if (a.mode === "thim") {
+        if (a.mode === "tdac") {
+          const done = a.qr === "done";
+          body = `<div class="card float thim-head"><span class="tdac-logo lg"><img src="${TDAC_BADGE}" alt="TDAC"></span><div class="sp"><b>ดึงข้อมูลจาก TDAC</b><small>ใช้ QR Code จากใบยืนยัน Thailand Digital Arrival Card ที่ได้ทางอีเมลหลังกรอก TDAC ก่อนเดินทางเข้าไทย</small></div></div>
+  ${
+    done
+      ? `<div class="card mt12 tdac-found"><div class="flex" style="gap:10px"><span class="tw-ic sm">${ic("check", 20)}</span><div class="sp"><b>พบข้อมูล TDAC</b><small>${TDAC_META.no} · ${TDAC_META.flight}</small></div></div>
+  <div class="mt8">${TDAC_FIELDS.slice(0, 4).map(([k, l]) => `<div class="kv"><span>${l}</span><b>${k === "dob" ? fd(SAMPLE[k]) : esc(SAMPLE[k])}</b></div>`).join("")}<div class="kv"><span>วันที่เดินทางเข้าไทย</span><b>${fd(SAMPLE.arrivalDate)}</b></div></div>
+  <a class="lnk" onclick="S.auth.qr=null;S.auth.sent=false;render()">${ic("refresh", 14)} สแกนใหม่</a></div>
+  <div class="card mt12">${a.sent ? otpBox(SAMPLE.email) : `<div class="perm"><b>ยืนยันว่าเป็นเจ้าของ TDAC</b><small style="display:block;margin-top:4px">ระบบจะส่งรหัส OTP ไปที่อีเมลที่ใช้กรอก TDAC (${maskEmail(SAMPLE.email)}) เพื่อป้องกันผู้อื่นนำ QR ของคุณไปใช้</small></div>`}</div>`
+      : `<div class="qr-scan ${a.qr === "busy" ? "busy" : ""}"><div class="qr-frame"><span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>${a.qr === "busy" ? '<span class="sb-line"></span>' : ""}${ic("qr", 64)}</div><b>${a.qr === "busy" ? "กำลังอ่าน QR Code…" : "วาง QR Code ของ TDAC ให้อยู่ในกรอบ"}</b><small>เปิดใบยืนยัน TDAC จากอีเมลหรือรูปที่บันทึกไว้</small></div>
+  <div class="btn2 mt12"><button class="btn btn-ghost btn-sm" ${a.qr === "busy" ? "disabled" : ""} onclick="authTdacScan('scan')">${ic("passport", 16)} สแกนด้วยกล้อง</button><button class="btn btn-ghost btn-sm" ${a.qr === "busy" ? "disabled" : ""} onclick="authTdacScan('file')">${ic("upload", 16)} เลือกรูป / PDF</button></div>
+  <div class="login-note">${ic("shield", 16)}<span>ข้อมูลที่ได้: ชื่อ เลขหนังสือเดินทาง สัญชาติ วันเกิด อาชีพ ที่พำนัก วันที่เข้าไทย และวัตถุประสงค์การเดินทาง</span></div>`
+  }`;
+          cta = !done
+            ? `<button class="btn btn-primary" ${a.qr === "busy" ? "disabled" : ""} onclick="authTdacScan('scan')">${ic("qr", 18)} สแกน QR Code</button>`
+            : a.sent
+              ? `<button class="btn btn-primary" onclick="authVerify()">ยืนยันและดึงข้อมูล</button>`
+              : `<button class="btn btn-primary" onclick="authSendOtp()">ส่งรหัส OTP ทางอีเมล</button>`;
+        } else if (a.mode === "thim") {
           const opt = (v, i, t, s) =>
             `<button class="viaopt ${a.via === v ? "on" : ""}" onclick="S.auth.via='${v}';S.auth.err={};render()"><span class="ri c-blue">${ic(i, 20)}</span><span class="sp"><b>${t}</b><small>${s}</small></span><span class="radio"></span></button>`;
           body = `<div class="card float thim-head"><img class="thim-logo lg" src="${THIM_LOGO}" alt="THIM"><div class="sp"><b>ลงชื่อเข้าใช้ด้วย THIM</b><small>แอปข้อมูลผู้เดินทางเข้าประเทศไทย ระบบจะขอดึงข้อมูลพื้นฐานของคุณมาใช้ในแอปทางรัฐ</small></div></div>
@@ -5550,7 +6130,7 @@
             ? `<button class="btn btn-primary" onclick="authVerify()">ยืนยันอีเมล</button>`
             : `<button class="btn btn-primary" onclick="authSendOtp()">ส่งรหัสยืนยันทางอีเมล</button>`;
         }
-        return `${appbar(a.mode === "thim" ? "เข้าสู่ระบบ" : "สมัครใช้งาน")}
+        return `${appbar(a.mode === "signup" ? "สมัครใช้งาน" : "เข้าสู่ระบบ")}
  <div class="content">${body}</div>
  ${cta ? `<div class="footer-cta">${cta}</div>` : ""}`;
       };
@@ -5561,13 +6141,15 @@
           ob = S.ob,
           st = ob.step,
           e = ob.err,
-          thim = ob.mode === "thim";
-        const STEPS = [thim ? "ข้อมูลจาก THIM" : "ข้อมูลส่วนตัว", "ข้อมูลการเดินทาง", "วีซ่าและการพำนัก", "การศึกษา", "เอกสาร"];
+          thim = !!SRC_NAME[ob.mode], // ดึงข้อมูลอัตโนมัติ (THIM หรือ TDAC)
+          srcN = SRC_NAME[ob.mode],
+          srcLogo = ob.mode === "tdac" ? `<span class="tdac-logo"><img src="${TDAC_BADGE}" alt="TDAC"></span>` : `<img class="thim-logo" src="${THIM_LOGO}" alt="THIM">`;
+        const STEPS = [thim ? `ข้อมูลจาก ${srcN}` : "ข้อมูลส่วนตัว", "ข้อมูลการเดินทาง", "วีซ่าและการพำนัก", "การศึกษา", "เอกสาร"];
         const tag = (k) =>
           ob.src[k] === "scan"
             ? `<span class="autotag">${ic("check", 12)} จากการสแกน</span>`
-            : ob.src[k] === "thim" && p[k]
-              ? `<span class="autotag">${ic("check", 12)} จาก THIM</span>`
+            : SRC_NAME[ob.src[k]] && p[k]
+              ? `<span class="autotag">${ic("check", 12)} จาก ${SRC_NAME[ob.src[k]]}</span>`
               : "";
         const inp = (k, l, o = {}) => {
           const v = p[k] ?? "",
@@ -5592,9 +6174,9 @@
             : "";
         let body, cta;
         if (st === 0 && thim) {
-          body = `<div class="card float"><div class="blk-h"><img class="thim-logo" src="${THIM_LOGO}" alt="THIM"><div class="sp"><b>ดึงมาจาก THIM</b><small>แก้ไขในแอปนี้ไม่ได้ หากไม่ถูกต้องให้แก้ในแอป THIM</small></div></div>
-  ${THIM_FIELDS.map(([k, l]) => `<div class="kv"><span>${l}</span><b>${p[k] ? (k === "dob" ? fd(p[k]) : esc(p[k])) : '<span class="muted">ไม่ได้ระบุ</span>'}</b></div>`).join("")}</div>
-  <div class="card mt12"><div class="blk-h"><span class="ao-ic sm">${ic("edit", 18)}</span><div class="sp"><b>เพิ่มเอง</b><small>ข้อมูลที่ THIM ไม่มี</small></div></div>${sampleBtn}
+          body = `<div class="card float"><div class="blk-h">${srcLogo}<div class="sp"><b>ดึงมาจาก ${srcN}</b><small>${ob.mode === "tdac" ? `${TDAC_META.no} · แก้ไขในแอปนี้ไม่ได้` : "แก้ไขในแอปนี้ไม่ได้ หากไม่ถูกต้องให้แก้ในแอป THIM"}</small></div></div>
+  ${srcFields(ob.mode).map(([k, l]) => `<div class="kv"><span>${l}</span><b>${p[k] ? (k === "dob" ? fd(p[k]) : esc(p[k])) : '<span class="muted">ไม่ได้ระบุ</span>'}</b></div>`).join("")}</div>
+  <div class="card mt12"><div class="blk-h"><span class="ao-ic sm">${ic("edit", 18)}</span><div class="sp"><b>เพิ่มเอง</b><small>ข้อมูลที่ ${srcN} ไม่มี</small></div></div>${sampleBtn}
   ${inp("passExp", "วันหมดอายุหนังสือเดินทาง", { type: "date", hint: "ใช้ตรวจว่าต่ออายุวีซ่าได้หรือไม่", after: passWarn })}</div>`;
           cta = "ข้อมูลถูกต้อง ถัดไป";
         } else if (st === 0) {
@@ -5698,7 +6280,7 @@
             k: "personal",
             i: "passport",
             t: "ข้อมูลส่วนตัว",
-            s: `สัญชาติ${p.nat} · ${p.gender} · ${fd(p.dob)}${S.ob && S.ob.mode === "thim" ? " · จาก THIM" : ""}`,
+            s: `สัญชาติ${p.nat} · ${p.gender} · ${fd(p.dob)}${S.ob && SRC_NAME[S.ob.mode] ? ` · จาก ${SRC_NAME[S.ob.mode]}` : ""}`,
             rows: [
               ["ชื่อ-นามสกุล", p.name],
               ["เลขหนังสือเดินทาง", p.passport],
@@ -5789,7 +6371,7 @@
   <div class="id-uni">${ic("school", 16)}<span>${[p.uni, p.faculty].filter(Boolean).join(" · ")}</span></div>
  </div>
  <div class="schips">
-  ${S.ob && S.ob.mode === "thim" ? `<span class="badge b-leaf">${ic("check", 13)} เชื่อมต่อ THIM แล้ว</span>` : `<span class="badge b-green">${ic("check", 13)} ยืนยันอีเมลแล้ว</span>`}
+  ${S.ob && SRC_NAME[S.ob.mode] ? `<span class="badge b-leaf">${ic("check", 13)} ${S.ob.mode === "tdac" ? "ข้อมูลจาก TDAC" : "เชื่อมต่อ THIM แล้ว"}</span>` : `<span class="badge b-green">${ic("check", 13)} ยืนยันอีเมลแล้ว</span>`}
   <span class="badge ${vd <= 30 ? "b-amber" : "b-blue"}">${ic("cal", 13)} วีซ่าเหลือ ${vd} วัน</span>
   ${p.wallet.includes("tm30_receipt") ? `<span class="badge b-green">${ic("check", 13)} มีใบรับ ตม.30</span>` : `<span class="badge b-gray">ยังไม่มีใบรับ ตม.30</span>`}
  </div>
@@ -5999,7 +6581,7 @@
     if (!k) return "";
     if (S.svc === "ext") return ""; // ต่อวีซ่า: แสดงเอกสารที่ดึงอัตโนมัติในส่วน "เอกสารที่ต้องใช้" แทน
     const v = [p.name, p.gender, fd(p.dob), p.nat, p.passport, p.occupation].filter(Boolean);
-    return `<div class="card autoform"><div class="flex" style="gap:10px"><span class="ri c-blue">${ic("doc", 20)}</span><div class="sp"><b>ระบบกรอก${DOCS[k].n.split(" ").slice(0, 2).join(" ")} ให้อัตโนมัติ</b><small>จากข้อมูลส่วนตัว${S.ob && S.ob.mode === "thim" ? " (ดึงจาก THIM)" : ""} ไม่ต้องกรอกซ้ำ</small></div></div><div class="af-v">${v.map((x) => `<span>${esc(x)}</span>`).join("")}</div></div>`;
+    return `<div class="card autoform"><div class="flex" style="gap:10px"><span class="ri c-blue">${ic("doc", 20)}</span><div class="sp"><b>ระบบกรอก${DOCS[k].n.split(" ").slice(0, 2).join(" ")} ให้อัตโนมัติ</b><small>จากข้อมูลส่วนตัว${S.ob && SRC_NAME[S.ob.mode] ? ` (ดึงจาก ${SRC_NAME[S.ob.mode]})` : ""} ไม่ต้องกรอกซ้ำ</small></div></div><div class="af-v">${v.map((x) => `<span>${esc(x)}</span>`).join("")}</div></div>`;
   })()}
   <div class="sec-title">กรอกข้อมูล</div>
   <div class="card">${fs.map(field).join("")}
