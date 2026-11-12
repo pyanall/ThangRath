@@ -4364,6 +4364,135 @@
       .login-hero h1 {
         font-size: 19px;
       }
+      /* --- นัดหมาย ตม. --- */
+      .apptsvc {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        text-align: left;
+        padding: 14px;
+        background: #fff;
+        border-radius: 18px;
+        border: 1px solid var(--edge);
+        box-shadow: var(--sh-1);
+        color: var(--ink-3);
+      }
+      .apptsvc b {
+        display: block;
+        font-size: 15px;
+        color: var(--ink);
+      }
+      .apptsvc small {
+        display: block;
+        font-size: 12.5px;
+        color: var(--ink-2);
+      }
+      .chips.wrap {
+        flex-wrap: wrap;
+        overflow: visible;
+      }
+      .appt-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 12px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        background: var(--green-50);
+        color: var(--green);
+        font-size: 12.5px;
+      }
+      .appt-chip span {
+        color: var(--ink);
+      }
+      .bk-bring {
+        font-size: 12.5px;
+        color: var(--ink-2);
+        line-height: 1.5;
+      }
+      .bk-bring b {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--ink);
+        font-size: 13.5px;
+        margin-bottom: 2px;
+      }
+      .apptc {
+        display: flex;
+        gap: 14px;
+        align-items: stretch;
+        padding: 14px;
+        background: #fff;
+        border-radius: 18px;
+        border: 1px solid var(--edge);
+        box-shadow: var(--sh-1);
+      }
+      .ap-date {
+        width: 62px;
+        flex-shrink: 0;
+        border-radius: 14px;
+        background: linear-gradient(160deg, var(--blue), var(--navy));
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 0;
+      }
+      .ap-date b {
+        font-size: 26px;
+        line-height: 1.1;
+      }
+      .ap-date small {
+        font-size: 11.5px;
+        opacity: 0.9;
+      }
+      .apptc .sp > b {
+        display: block;
+        font-size: 15px;
+        margin-top: 4px;
+      }
+      .apptc .sp > small {
+        display: block;
+        font-size: 12px;
+        color: var(--ink-2);
+        line-height: 1.4;
+      }
+      .ap-acts {
+        display: flex;
+        gap: 14px;
+        margin-top: 8px;
+      }
+      .ap-acts a {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--blue);
+        cursor: pointer;
+      }
+      .ap-acts a.r {
+        color: var(--red);
+        margin-left: auto;
+      }
+      /* วันที่วันนี้บนหน้าหลัก */
+      .today-chip {
+        display: flex;
+        width: fit-content;
+        align-items: center;
+        gap: 5px;
+        margin-top: 6px;
+        padding: 3px 10px;
+        border-radius: 99px;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid var(--edge);
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--navy);
+      }
     </style>
   </head>
   <body>
@@ -4922,6 +5051,7 @@
         event: "all",
         rem: { d30: true, d15: true, d7: true, d1: true },
         appt: null,
+        apSvc: null, // เรื่องที่จะไปยื่น (ตอนจองนัด)
         apDate: null,
         apTime: null,
         help: { open: false, tab: "ai", chat: [], typing: false },
@@ -5259,6 +5389,7 @@
       function timeline() {
         const p = S.p,
           t = [];
+        if (S.appt) t.push({ d: S.appt.d, t: `นัดหมาย ตม. · ${S.appt.t} น.`, s: SV[S.appt.svc] ? SV[S.appt.svc].short : "ติดต่อเรื่องอื่น ๆ" });
         t.push({
           d: addDays(p.expiry, -30),
           t: "เริ่มเตรียมเอกสารต่อวีซ่า",
@@ -5459,6 +5590,7 @@
         S.agree = false;
         S.apDate = null;
         S.apTime = null;
+        S.apSvc = null;
         Object.assign(UI, { trackTab: "active", remOpen: false, docsOpen: false, readyOpen: true, profOpen: null, lastSvc: null });
         S.hist = [];
         S.screen = "onboard";
@@ -5863,9 +5995,27 @@
           toast("กรุณาเลือกวันและเวลา");
           return;
         }
-        S.appt = { d: S.apDate, t: S.apTime };
-        render();
+        if (!S.apSvc) {
+          toast("กรุณาเลือกเรื่องที่จะไปยื่น");
+          return;
+        }
+        S.appt = { d: S.apDate, t: S.apTime, svc: S.apSvc };
+        S.apDate = S.apTime = null;
+        tab("track"); // จองเสร็จ → แสดงนัดในหน้าสถานะ
         toast("ยืนยันนัดหมายเรียบร้อยแล้ว");
+      }
+      /** สำนักงานที่นัด (ข้อมูลจำลอง) */
+      const IMM_OFFICE = "สำนักงานตรวจคนเข้าเมือง ศูนย์ราชการแจ้งวัฒนะ อาคาร B";
+      /** เปิดหน้าจองนัด ตม. (เลือกเรื่องที่จะไปยื่นไว้ล่วงหน้าได้) */
+      function openAppt(svc) {
+        S.apSvc = svc || S.apSvc || null;
+        go("appt");
+      }
+      /** ยกเลิกนัดหมาย */
+      function cancelAppt() {
+        S.appt = null;
+        render();
+        toast("ยกเลิกนัดหมายแล้ว");
       }
       /** คัดลอกข้อความสองภาษาถึงเจ้าของที่พัก (บริการ ตม.30) */
 
@@ -5877,6 +6027,9 @@
        *   login → profile → home → select → form → check → (modal) → track
        * ================================================================== */
       const SCREENS = {};
+      /** วันนี้แบบเต็ม เช่น "พฤหัสบดี 12 พ.ย. 2569" (ใช้ TODAY = วันที่ของเครื่อง) */
+      const todayTH = () =>
+        `${["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"][TODAY.getDay()]} ${fd(iso8(TODAY))}`;
 
       /* ---------- UI ช่วยแสดงผล (ดีไซน์เท่านั้น ไม่ใช่ข้อมูลหรือกฎ) ----------
          UI : สถานะการแสดงผลชั่วคราว เช่น แท็บที่เลือก กลุ่มที่ยุบ/กาง — แยกจาก S เพื่อไม่ยุ่งกับ state หลัก */
@@ -6335,7 +6488,7 @@
           act = S.requests.filter((r) => !r.done);
         const quick = ["ext", "report90", "tm30", "reentry"];
         return `<div class="content home" style="padding:0">
- <div class="hero"><div class="hero-top"><div><small>สวัสดี</small><b>${p.name}</b></div><button class="iconbtn" onclick="tab('track')" aria-label="การแจ้งเตือน">${ic("bell")}<span class="dot"></span></button></div></div>
+ <div class="hero"><div class="hero-top"><div><small>สวัสดี</small><b>${p.name}</b><span class="today-chip">${ic("cal", 13)} วันนี้ · ${todayTH()}</span></div><button class="iconbtn" onclick="tab('track')" aria-label="การแจ้งเตือน">${ic("bell")}<span class="dot"></span></button></div></div>
  <div class="visa-card"><div class="vc-top"><div><div class="vc-label">วีซ่าปัจจุบัน</div><div class="vc-type">${p.visa}</div></div>${d <= 30 ? `<span class="badge b-urgent">${ic("alert", 13)} ใกล้หมดอายุ</span>` : `<span class="badge b-green">ปกติ</span>`}</div>
   <div class="cd${lvl}${anim ? " anim" : ""}">
    <div class="cd-num"><b id="cdNum" data-from="${anim ? total : d}" data-to="${d}">${anim ? total : d}</b><div><b>วัน</b><small>ก่อนวีซ่าหมดอายุ</small></div></div>
@@ -6398,6 +6551,8 @@
  <div class="sec-title">${S.event === "all" ? "บริการทั้งหมด" : "ที่เกี่ยวข้อง"}</div>
  <div class="grid">${show.map(tile).join("")}</div>
  <div id="noRes" class="card muted" style="display:none;text-align:center">ไม่พบบริการที่ค้นหา</div>
+ <div class="sec-title">ยื่นด้วยตนเองที่สำนักงาน</div>
+ <button class="apptsvc" data-q="นัดหมาย ตม. สำนักงาน ยื่นด้วยตนเอง" onclick="openAppt()"><span class="ri c-blue">${ic("cal", 22)}</span><span class="sp"><b>นัดหมาย ตม.</b><small>${S.appt ? `มีนัดแล้ว · ${fd(S.appt.d)} ${S.appt.t} น.` : "จองคิวไปยื่นเรื่องที่สำนักงานตรวจคนเข้าเมือง"}</small></span>${S.appt ? '<span class="badge b-green">จองแล้ว</span>' : ""}${ic("chev", 18)}</button>
  <details class="card acc2 mt16"><summary>บริการต่างกันอย่างไร?${ic("chev", 18)}</summary>
   <div class="cmp mt8">
   <div class="c-blue"><b>รายงานตัว 90 วัน</b>แจ้งว่ายังพำนักที่อยู่เดิม ไม่ใช่การขยายวีซ่า</div>
@@ -6405,6 +6560,43 @@
   <div class="c-blue"><b>Re-entry Permit</b>คงสถานะวีซ่าเมื่อเดินทางกลับเข้าประเทศ</div></div>
   <button class="btn btn-ghost btn-sm mt12" style="width:100%" onclick="openHelp('ai')">${ic("spark", 18)} ถามผู้ช่วย AI</button></details>
  </div>${nav("select")}`;
+      };
+
+      /* ---------- หน้า APPT : จองนัดยื่นด้วยตนเองที่สำนักงาน ตม. (เข้าจากหน้าบริการ) ---------- */
+      SCREENS.appt = () => {
+        const wd = [];
+        let d = D(iso8(TODAY));
+        while (wd.length < 6) {
+          d.setDate(d.getDate() + 1);
+          if (d.getDay() % 6) wd.push(iso8(d));
+        }
+        const DOW = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
+        const opts = Object.keys(SV).map((id) => [id, SV[id].short]).concat([["other", "เรื่องอื่น ๆ"]]);
+        const sv = SV[S.apSvc];
+        const bring = sv
+          ? sv.docs
+              .filter((k) => !DOCS[k].auto)
+              .map((k) => DOCS[k].n)
+              .join(" · ")
+          : "หนังสือเดินทางตัวจริง";
+        return `${appbar("นัดหมาย ตม.")}
+ <div class="content">
+ <div class="card float"><div class="flex" style="gap:12px"><span class="ri c-blue">${ic("pin", 22)}</span><div class="sp"><b style="display:block;font-size:15px">${IMM_OFFICE}</b><span class="muted" style="font-size:12.5px">จันทร์–ศุกร์ 08:30–16:30 น. · ยื่นด้วยตนเอง</span></div></div>
+ ${S.appt ? `<div class="appt-chip">${ic("cal", 15)}<span>นัดปัจจุบัน <b>${fd(S.appt.d)} · ${S.appt.t} น.</b> — จองใหม่จะแทนนัดเดิม</span></div>` : ""}</div>
+ <div class="sec-title">ไปยื่นเรื่องอะไร</div>
+ <div class="chips wrap">${opts.map(([id, l]) => `<button class="chip ${S.apSvc === id ? "on" : ""}" onclick="S.apSvc='${id}';render()">${l}</button>`).join("")}</div>
+ <div class="sec-title">เลือกวัน</div>
+ <div class="slots">${wd
+   .map((x) => {
+     const y = D(x);
+     return `<button class="slot ${S.apDate === x ? "on" : ""}" onclick="S.apDate='${x}';S.apTime=null;render()">${DOW[y.getDay()]}<b>${y.getDate()}</b>${TH_M[y.getMonth()]}</button>`;
+   })
+   .join("")}</div>
+ <div class="sec-title">เลือกเวลา</div>
+ <div class="times">${["09:00", "10:30", "13:30", "15:00"].map((t, i) => `<button class="${S.apTime === t ? "on" : ""}" ${i === 1 && S.apDate === wd[0] ? "disabled" : ""} onclick="S.apTime='${t}';render()">${t}</button>`).join("")}</div>
+ ${S.apSvc ? `<div class="card mt12 bk-bring"><b>${ic("doc", 15)} นำเอกสารตัวจริงไปด้วย</b>${bring}</div>` : ""}
+ </div>
+ <div class="footer-cta"><button class="btn btn-primary" onclick="book()">ยืนยันนัดหมาย</button></div>`;
       };
 
       /* ---------- หน้า FORM : รายละเอียดบริการ (สิทธิ์, ขั้นตอน, เอกสาร) + แบบฟอร์ม ---------- */
@@ -6611,7 +6803,7 @@
           hero = `<div class="card float rq-hero"><div class="flex"><span class="badge b-amber">${cur.steps[cur.step - 1]}</span><span class="sp"></span><span class="muted" style="font-size:12px">${cur.id}</span></div>
   <div class="flex" style="margin-top:10px;gap:12px"><span class="ri ${s.c}">${ic(s.ic, 22)}</span><div class="sp"><b style="display:block;font-size:16px;line-height:1.3">${s.name}</b><span class="muted" style="font-size:12.5px">ยื่นเมื่อ ${fd(cur.date)}</span></div></div>
   ${stepper(cur.steps, cur.step - 1)}
-  <div class="btn2"><button class="btn btn-ghost btn-sm" onclick="jump('rq_${cur.id}')">ดูรายละเอียด</button><button class="btn btn-primary btn-sm" onclick="jump('appt')">${ic("cal", 16)} จองนัด ตม.</button></div></div>`;
+  <div class="btn2"><button class="btn btn-ghost btn-sm" onclick="jump('rq_${cur.id}')">ดูรายละเอียด</button><button class="btn btn-primary btn-sm" onclick="openAppt('${cur.svc}')">${ic("cal", 16)} จองนัด ตม.</button></div></div>`;
         } else {
           hero = `<div class="card float rq-empty"><div class="flex" style="gap:12px"><span class="ei c-blue">${ic("doc", 24)}</span><div class="sp"><b style="display:block;font-size:15.5px">${rs.length ? "ไม่มีคำขอที่กำลังดำเนินการ" : "ยังไม่มีคำขอ"}</b><span class="muted" style="font-size:12.5px">${a.b ? "สิ่งที่ควรทำตอนนี้" : a.m}</span></div></div>
   ${a.b ? `<button class="sugg ${a.c === "red" ? "hot" : ""}" onclick="openSvc('${a.svc}')"><span class="ai">${ic(a.i, 20)}</span><span class="sp"><b>${a.t}</b><small>${a.b}</small></span>${ic("chev", 18)}</button>` : `<button class="btn btn-primary btn-sm mt12" style="width:100%" onclick="tab('select')">เลือกบริการ</button>`}</div>`;
@@ -6639,6 +6831,12 @@
         return `${appbar("สถานะคำขอ")}
  <div class="content">
  ${hero}
+ ${
+   S.appt
+     ? `<div class="sec-title" id="appt">นัดหมาย ตม.</div>
+ <div class="apptc"><div class="ap-date"><small>${TH_M[D(S.appt.d).getMonth()]}</small><b>${D(S.appt.d).getDate()}</b><small>${S.appt.t} น.</small></div><div class="sp"><span class="badge b-blue">${days(S.appt.d) === 0 ? "วันนี้" : days(S.appt.d) === 1 ? "พรุ่งนี้" : `อีก ${days(S.appt.d)} วัน`}</span><b>${SV[S.appt.svc] ? SV[S.appt.svc].name : "ติดต่อเรื่องอื่น ๆ"}</b><small>${IMM_OFFICE}</small><div class="ap-acts"><a onclick="toast('เปิดแผนที่ (จำลอง)')">${ic("pin", 14)} แผนที่</a><a onclick="openAppt('${S.appt.svc}')">${ic("edit", 14)} เปลี่ยนนัด</a><a class="r" onclick="cancelAppt()">ยกเลิก</a></div></div></div>`
+     : ""
+ }
  ${
    rs.length
      ? `<div class="sec-title">คำขอของฉัน</div>
@@ -6669,20 +6867,6 @@
          )
          .join("")
      : ""
- }</div>
- <div class="sec-title" id="appt">นัดหมาย ตม.</div>
- <div class="card">${
-   S.appt
-     ? `<div class="flex"><span class="ri c-green" style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center">${ic("cal")}</span><div class="sp"><b style="display:block">${fd(S.appt.d)} · ${S.appt.t} น.</b><span class="muted">สำนักงานตรวจคนเข้าเมือง</span></div></div><button class="btn btn-line btn-sm mt12" style="width:100%" onclick="S.appt=null;S.apDate=null;S.apTime=null;render();toast('ยกเลิกนัดหมายแล้ว')">ยกเลิกนัดหมาย</button>`
-     : `<div class="muted" style="margin-bottom:10px">สำหรับกรณีที่ต้องยื่นด้วยตนเอง</div>
-  <div class="slots">${wd
-    .map((x) => {
-      const y = D(x);
-      return `<button class="slot ${S.apDate === x ? "on" : ""}" onclick="S.apDate='${x}';render()">${DOW[y.getDay()]}<b>${y.getDate()}</b>${TH_M[y.getMonth()]}</button>`;
-    })
-    .join("")}</div>
-  <div class="times">${["09:00", "10:30", "13:30", "15:00"].map((t, i) => `<button class="${S.apTime === t ? "on" : ""}" ${i === 1 && S.apDate === wd[0] ? "disabled" : ""} onclick="S.apTime='${t}';render()">${t}</button>`).join("")}</div>
-  <button class="btn btn-primary btn-sm" style="width:100%;height:44px" onclick="book()">ยืนยันนัดหมาย</button>`
  }</div>
  </div>${nav("track")}`;
       };
